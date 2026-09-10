@@ -1,0 +1,84 @@
+{
+  "receipt_id": "auth_4f31e8ebe3d95442f8f7",
+  "kid": "cosmos-demo-2026-09",
+  "issued_at": 1788941316337,
+  "format": "COSE_Sign1 (RFC 9052), Ed25519, deterministic CBOR (RFC 8949 §4.2)",
+  "cose_base64": "0oRYGKIBJwRTY29zbW9zLWRlbW8tMjAyNi0wOaBZBHi4IGZjaGVja3OHomRuYW1ldkN1cnJlbmN5IG1hdGNoZXMgZ3JhbnRkcGFzc/WiZG5hbWVmQWN0aXZlZHBhc3P1omRuYW1la05vdCBleHBpcmVkZHBhc3P1omRuYW1lclN1ZmZpY2llbnQgYmFsYW5jZWRwYXNz9aJkbmFtZXVVbmRlciBwZXItcGF5bWVudCBjYXBkcGFzc/SiZG5hbWVvVW5kZXIgZGFpbHkgY2FwZHBhc3P1omRuYW1lcENhdGVnb3J5IGFsbG93ZWRkcGFzc/Vmb3JnX2lkaG9yZ19kZW1vZnJlYXNvbnFQRVJfUEFZTUVOVF9MSU1JVGhhZ2VudF9pZHFhZ2VudF9yZXNlYXJjaF8wMWhjYXRlZ29yeWNhcGloY3VycmVuY3ljVVNEaGRlY2lzaW9uZERFTlloZ3JhbnRfaWR4GGdybl81ODJjNGU4MWZjMzNjMzdiYmRkMWhtZXJjaGFudG5hcGkub3BlbmFpLmNvbWlyYWlsX2xhdGX2amRlY2lkZWRfYXQbAAABoIU2MPFqZXhwaXJlc19hdPZqcmFpbF9zdGF0ZfZqcmFpbF90eF9pZPZqcmVjZWlwdF9pZHgZYXV0aF80ZjMxZThlYmUzZDk1NDQyZjhmN2thcHByb3Zlcl9pZPZraW50ZW50X2hhc2h4QGI2ZWRiZTJjMzgzYjg4MmQyMGM2ZWUxYmMwMzYzZmUyYTZiNTk1OWU2NmQ4ZTRjMDRhYTNmMWFiYzgxNThlNWNrcG9saWN5X2hhc2h4QDM3NTdiMWI1OWEwZWRhOTRkNTdjOTI5NjNiYjBhMTI4YmIwM2Q1YmMyMTY5ZDdhNDBjNDNkNWZlMzU2NDg0M2ZsYW1vdW50X21pbm9yGQu4bHJhaWxfb3V0Y29tZfZtY29zbW9zX3NjaGVtYQRtZW52ZWxvcGVfaGFzaHhAYjA0OWRhMWRlZmFhYmQ0MWUzOWNhNjdjMzA5MWU1YWE4YzAyZDgyZGEwNjM3NmE4MGY3ZTI1ZWIxNTYxOThhOW1yYWlsX3Byb3ZpZGVy9m5wb2xpY3lfdmVyc2lvbgFvY2FwYWJpbGl0eV9yb290eEA2ODcyZjA3YzBjNDc5NjEzODgzM2QyMzljYTBhOTY2MGZiZGZmYWFmMzY2MjliOTNmODMxNmMwODIzNmQyYWYxb2lkZW1wb3RlbmN5X2tleWlkZW1vLWRlbnlwYXBwcm92YWxfY2hhbm5lbPZwY2FwYWJpbGl0eV9wcm9vZqJjY2FwomR0eXBlaGNhdGVnb3J5ZXZhbHVlY2FwaWRwYXRogaJkaGFzaHhANDIzYzI2NjVmYzA5YTk0NjRiZDU1ODEzNTgzODhmZjZjMDI5ZjU4MGVkMWY3ZTY5YzBlMzU2ODZkZGFmZGI2ZWVyaWdodPRwcmFpbF9yZXBvcnRlZF9hdPZwcmFpbF9yZXBvcnRlZF9iefZxcGFyZW50X3JlY2VpcHRfaWT2dmFwcHJvdmVyX2F1dGhlbnRpY2F0ZWT2WEDNPGFv/vM2ffjX7V56/Hzdh27ZmjPbfalEGKa68l2MuT7LT5F5Ky53aumxRanIAHHQMnFE4D7orSE9EMWh3ZED",
+  "payload_unverified": {
+    "checks": [
+      {
+        "name": "Currency matches grant",
+        "pass": true
+      },
+      {
+        "name": "Active",
+        "pass": true
+      },
+      {
+        "name": "Not expired",
+        "pass": true
+      },
+      {
+        "name": "Sufficient balance",
+        "pass": true
+      },
+      {
+        "name": "Under per-payment cap",
+        "pass": false
+      },
+      {
+        "name": "Under daily cap",
+        "pass": true
+      },
+      {
+        "name": "Category allowed",
+        "pass": true
+      }
+    ],
+    "org_id": "org_demo",
+    "reason": "PER_PAYMENT_LIMIT",
+    "agent_id": "agent_research_01",
+    "category": "api",
+    "currency": "USD",
+    "decision": "DENY",
+    "grant_id": "grn_582c4e81fc33c37bbdd1",
+    "merchant": "api.openai.com",
+    "rail_late": null,
+    "decided_at": 1788941316337,
+    "expires_at": null,
+    "rail_state": null,
+    "rail_tx_id": null,
+    "receipt_id": "auth_4f31e8ebe3d95442f8f7",
+    "approver_id": null,
+    "intent_hash": "b6edbe2c383b882d20c6ee1bc0363fe2a6b5959e66d8e4c04aa3f1abc8158e5c",
+    "policy_hash": "3757b1b59a0eda94d57c92963bb0a128bb03d5bc2169d7a40c43d5fe3564843f",
+    "amount_minor": 3000,
+    "rail_outcome": null,
+    "cosmos_schema": 4,
+    "envelope_hash": "b049da1defaabd41e39ca67c3091e5aa8c02d82da06376a80f7e25eb156198a9",
+    "rail_provider": null,
+    "policy_version": 1,
+    "capability_root": "6872f07c0c4796138833d239ca0a9660fbdffaaf36629b93f8316c08236d2af1",
+    "idempotency_key": "demo-deny",
+    "approval_channel": null,
+    "capability_proof": {
+      "cap": {
+        "type": "category",
+        "value": "api"
+      },
+      "path": [
+        {
+          "hash": "423c2665fc09a9464bd5581358388ff6c029f580ed1f7e69c0e35686ddafdb6e",
+          "right": false
+        }
+      ]
+    },
+    "rail_reported_at": null,
+    "rail_reported_by": null,
+    "parent_receipt_id": null,
+    "approver_authenticated": null
+  },
+  "self_check": "ok",
+  "jwks": "/.well-known/jwks.json",
+  "verify": "python verifier/cosmos_verify.py <this json> <jwks json>"
+}

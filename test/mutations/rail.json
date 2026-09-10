@@ -1,0 +1,176 @@
+[
+  {
+    "$doc": "THE RAIL HANDOFF. Sixteen mutations against the four files that carry it. Loud ones prove a check exists; the boundary ones (R13, R14) prove it is CORRECT, and both were decided from the spec before the code was read back — the deadline extension may never shorten, and a reservation is valid AT its deadline (the house convention guardrails already uses for expires_at). R9 and R14 exist because writing this spec found two cases the suite could not see; the assertions that catch them (E11, C2a) were written for these mutations, not photographed from a passing run."
+  },
+  {
+    "file": "api/authorize.js",
+    "name": "R1 the sweep ignores settlement (a settled spend is auto-reversed anyway)",
+    "from": "    else if (e.kind === 'settlement') open.delete(e.authId);",
+    "to": "    else if (e.kind === 'settlement') { /* mutated */ }"
+  },
+  {
+    "file": "api/authorize.js",
+    "name": "R2 a submission does not extend the deadline (a slow success is still reversed under it)",
+    "from": "    else if (e.kind === 'submission') { const r = open.get(e.authId); if (r && e.expiresAt > r.deadline) r.deadline = e.expiresAt; }",
+    "to": "    else if (e.kind === 'submission') { /* mutated */ }"
+  },
+  {
+    "file": "api/authorize.js",
+    "name": "R14 BOUNDARY: a reservation expires AT its deadline instead of after it",
+    "from": "    if (r.deadline && now > r.deadline) {",
+    "to": "    if (r.deadline && now >= r.deadline) {"
+  },
+  {
+    "file": "api/authorize.js",
+    "name": "R5 the RAW settlement capability is written to the durable log (a leaked backup forges settlements)",
+    "from": "                       railTokenHash: cap.hash });",
+    "to": "                       railTokenHash: cap.hash, railToken: cap.token });"
+  },
+  {
+    "file": "core/rail.js",
+    "name": "R3 capabilityMatches accepts anything (any caller can cancel a reversal)",
+    "from": "  const a = crypto.createHash('sha256').update(capabilityHash(authId, presented)).digest();",
+    "to": "  if (presented) return true;\n  const a = crypto.createHash('sha256').update(capabilityHash(authId, presented)).digest();"
+  },
+  {
+    "file": "core/rail.js",
+    "name": "R4 the capability hash stops binding the authId (one token works on every authorization)",
+    "from": "  return crypto.createHash('sha256').update(String(authId) + '|' + String(token)).digest('hex');",
+    "to": "  return crypto.createHash('sha256').update(String(token)).digest('hex');"
+  },
+  {
+    "file": "core/rail.js",
+    "name": "R13 BOUNDARY: a submission may SHORTEN a deadline (a rail can pull a reservation in early)",
+    "from": "        if (e.expiresAt && e.expiresAt > s.deadline) s.deadline = e.expiresAt;",
+    "to": "        if (e.expiresAt) s.deadline = e.expiresAt;"
+  },
+  {
+    "file": "core/rail.js",
+    "name": "R8 a late settlement does not re-reserve (real money stays uncounted)",
+    "from": "  if (late) out.push(Object.assign({ kind: 'reservation' }, base, { amount: state.amount, reason: 'LATE_SETTLEMENT' }));",
+    "to": "  if (false) out.push(Object.assign({ kind: 'reservation' }, base, { amount: state.amount, reason: 'LATE_SETTLEMENT' }));"
+  },
+  {
+    "file": "core/rail.js",
+    "name": "R9 a failed report reverses even when the TTL already did (budget credited TWICE for one payment)",
+    "from": "    if (state.reserved) out.push(Object.assign({ kind: 'reversal' }, base, { amount: state.amount, reason: 'RAIL_FAILED' }));",
+    "to": "    out.push(Object.assign({ kind: 'reversal' }, base, { amount: state.amount, reason: 'RAIL_FAILED' }));"
+  },
+  {
+    "file": "core/rail.js",
+    "name": "R11 a settled report no longer needs a transaction id (a settlement naming nothing)",
+    "from": "  if (b.outcome === 'settled' && !(typeof b.tx_id === 'string' && b.tx_id)) {",
+    "to": "  if (false) {"
+  },
+  {
+    "file": "api/settlements.js",
+    "name": "R6 every report is recorded as 'capability' (the operator claim is laundered into the stronger one)",
+    "from": "  if (writePolicy && writePolicy.mode === 'token' && tokenMatches(presented, writePolicy.token)) return 'operator';",
+    "to": "  if (writePolicy && writePolicy.mode === 'token' && tokenMatches(presented, writePolicy.token)) return 'capability';"
+  },
+  {
+    "file": "api/settlements.js",
+    "name": "R7 a contradicting second report is accepted (settled and failed both signed)",
+    "from": "        throw new HttpError(409, 'ALREADY_REPORTED',",
+    "to": "        if (0) throw new HttpError(409, 'ALREADY_REPORTED',"
+  },
+  {
+    "file": "api/settlements.js",
+    "name": "R10 the settlement reuses the authorization id (the report SHADOWS the ALLOW receipt it descends from)",
+    "from": "      const stlId = newId('stl');",
+    "to": "      const stlId = authId;"
+  },
+  {
+    "file": "api/settlements.js",
+    "name": "R12 the receipt claims Cosmos observed the rail (the one thing it must never say)",
+    "from": "                 { name: 'Rail outcome observed by Cosmos', pass: false }],",
+    "to": "                 { name: 'Rail outcome observed by Cosmos', pass: true }],"
+  },
+  {
+    "file": "core/receipt.js",
+    "name": "R15 the schema is not bumped (an old verifier prints a tx id with no NOT-OBSERVED qualifier)",
+    "from": "const SCHEMA = 4;",
+    "to": "const SCHEMA = 3;"
+  },
+  {
+    "file": "core/receipt.js",
+    "name": "R16 rail_late is always false (the TTL's wrong guess is hidden from the auditor)",
+    "from": "    rail_late: d.rail_outcome == null ? null : (d.rail_late === true),",
+    "to": "    rail_late: d.rail_outcome == null ? null : false,"
+  },
+  {
+    "$doc": "ROUND 2, after review (Ramu, 2026-09-08). R17-R22 cover the credential split, the schema-acceptance set and the overrun code. R19 is the most useful of them: it is the PARTIAL FIX a reader would write from the review message alone. The reviewer named `settled` as the danger; the severe direction is `failed`, because that one returns the budget and buys a double-spend. A fix that blocks only what the review named would pass every assertion written to that review's framing, so K1/K3 exist to catch it. R22 is the second boundary pair in this spec: spent EQUAL to budget is spent-out, not overrun, decided before the code was read back."
+  },
+  {
+    "file": "api/settlements.js",
+    "name": "R17 THE DOUBLE-SPEND: the ALLOW holder may report `failed`, so it gets its own budget back and spends the same money twice",
+    "from": "const MAY_REPORT = { submitted: ['allow_holder', 'operator', 'rail'], settled: ['operator', 'rail'], failed: ['rail'] };",
+    "to": "const MAY_REPORT = { submitted: ['allow_holder', 'operator', 'rail'], settled: ['operator', 'rail'], failed: ['rail', 'allow_holder'] };"
+  },
+  {
+    "file": "api/settlements.js",
+    "name": "R18 the rail token alone settles, with no handoff check (a rail settles authorizations it was never given)",
+    "from": "    if (!rail.capabilityMatches(state.authId, String(handoff), state.tokenHash)) {",
+    "to": "    if (false) {"
+  },
+  {
+    "file": "api/settlements.js",
+    "name": "R19 THE PARTIAL FIX: `settled` is correctly restricted and `failed` is left open to everyone (the review named `settled`; `failed` is the severe direction)",
+    "from": "const MAY_REPORT = { submitted: ['allow_holder', 'operator', 'rail'], settled: ['operator', 'rail'], failed: ['rail'] };",
+    "to": "const MAY_REPORT = { submitted: ['allow_holder', 'operator', 'rail'], settled: ['operator', 'rail'], failed: ['allow_holder', 'operator', 'rail'] };"
+  },
+  {
+    "file": "core/receipt.js",
+    "name": "R20 the verifier stops accepting older schemas (every receipt already in an audit file becomes unverifiable)",
+    "from": "const ACCEPTED_SCHEMAS = [2, 3, 4];",
+    "to": "const ACCEPTED_SCHEMAS = [4];"
+  },
+  {
+    "file": "core/agent-view.js",
+    "name": "R21 an overrun grant reports INSUFFICIENT_BALANCE again (a reader is told to retry smaller, forever)",
+    "from": "  if (!g.approved && g.reason === 'INSUFFICIENT_BALANCE' && +view.spent > +view.budget) {",
+    "to": "  if (false) {"
+  },
+  {
+    "file": "core/agent-view.js",
+    "name": "R22 BOUNDARY: spent EQUAL to budget is reported as overrun (a grant that did exactly what it was told reads as broken)",
+    "from": "  if (!g.approved && g.reason === 'INSUFFICIENT_BALANCE' && +view.spent > +view.budget) {",
+    "to": "  if (!g.approved && g.reason === 'INSUFFICIENT_BALANCE' && +view.spent >= +view.budget) {"
+  },
+  {
+    "file": "api/settlements.js",
+    "name": "R23 the OPERATOR may report `failed` too (a credential with no route that credits a grant gains one)",
+    "from": "const MAY_REPORT = { submitted: ['allow_holder', 'operator', 'rail'], settled: ['operator', 'rail'], failed: ['rail'] };",
+    "to": "const MAY_REPORT = { submitted: ['allow_holder', 'operator', 'rail'], settled: ['operator', 'rail'], failed: ['rail', 'operator'] };"
+  },
+  {
+    "file": "api/settlements.js",
+    "name": "R24 the ALLOW holder may report `settled` (it cannot take budget back, but it can certify its own payment)",
+    "from": "const MAY_REPORT = { submitted: ['allow_holder', 'operator', 'rail'], settled: ['operator', 'rail'], failed: ['rail'] };",
+    "to": "const MAY_REPORT = { submitted: ['allow_holder', 'operator', 'rail'], settled: ['operator', 'rail', 'allow_holder'], failed: ['rail'] };"
+  },
+  {
+    "$doc": "⚠ R17 and R19 SURVIVED a run of record on 2026-09-08 and the survival was MY doing, not a missing test: round 3 replaced the two `if` lines they were anchored to with the MAY_REPORT table, so `from` matched 0 times. mutate.js refused to apply them and counted them as survivors, which is the only reason it was noticed — had it skipped an unmatched mutation quietly, the run would have reported ALL CAUGHT while the two controls that prove the double-spend fix were dead. Re-anchored to the table. LESSON: a mutation spec is code that rots against the code it attacks, and 'the spec still parses' is not 'the spec still points at anything'."
+  },
+  {
+    "file": "core/rail.js",
+    "name": "R25 the rail's own state word is dropped (a Writ `reversed` becomes indistinguishable from a payment that never ran)",
+    "from": "    state: b.state == null ? null : b.state,",
+    "to": "    state: null,"
+  },
+  {
+    "file": "core/receipt.js",
+    "name": "R26 rail_state is left out of the signed bytes (the fact survives only in the HTTP reply, which nobody archives)",
+    "from": "    rail_state: d.rail_state == null ? null : String(d.rail_state),",
+    "to": "    rail_state: null,"
+  },
+  {
+    "file": "core/rail.js",
+    "name": "R27 `reversed` is accepted as a Cosmos OUTCOME (the closed set stops being closed)",
+    "from": "const OUTCOMES = ['submitted', 'settled', 'failed'];",
+    "to": "const OUTCOMES = ['submitted', 'settled', 'failed', 'reversed'];"
+  },
+  {
+    "$doc": "⚠ SECOND TIME: R15 and R20 rotted again on 2026-09-09, against MY OWN schema 3->4 bump. This morning R17/R19 rotted the same way against my assertMayReport refactor. The lesson from that run said a mutation spec is code that rots against the code it attacks - and I still did not re-anchor these when I changed the exact lines they point at. mutate.js caught it BOTH times by refusing to apply an unmatched `from` and counting it SURVIVED, which is the only reason either was noticed. RULE: when you edit a line, grep this spec for it in the same commit."
+  }
+]

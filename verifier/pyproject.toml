@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cosmos-verify"
+version = "0.1.0"
+description = "Verify a Cosmos agent-spend authorization receipt offline: COSE_Sign1 + Ed25519 against a published JWKS. No account, no network, no Cosmos code."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+dependencies = ["cryptography>=41"]
+keywords = ["cose", "scitt", "ed25519", "ai-agents", "authorization", "receipts", "mcp"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Topic :: Security :: Cryptography",
+  "Development Status :: 3 - Alpha",
+]
+
+[project.scripts]
+cosmos-verify = "cosmos_verify:cli"
+
+[tool.setuptools]
+py-modules = ["cosmos_verify"]

@@ -1,0 +1,10 @@
+[
+  { "file": "core/capability-commitment.js", "name": "C14 verifyAttenuation accepts ZERO proofs as ok",
+    "from": "if (!Array.isArray(proofs) || !proofs.length) return { ok: false, reason: 'NO_PROOFS' };", "to": "if (!Array.isArray(proofs)) return { ok: false, reason: 'NO_PROOFS' };" },
+  { "file": "core/capability-commitment.js", "name": "C15 parent attests bands ABOVE its own limit (limit*2)",
+    "from": "const attestations = ladder.filter((b) => b <= limit).map((band) => ({", "to": "const attestations = ladder.filter((b) => b <= limit * 2).map((band) => ({" },
+  { "file": "core/capability-commitment.js", "name": "C16 BOUNDARY: a band exactly equal to the limit is no longer attested (<= became <)",
+    "from": "const attestations = ladder.filter((b) => b <= limit).map((band) => ({", "to": "const attestations = ladder.filter((b) => b < limit).map((band) => ({" },
+  { "file": "core/capability-commitment.js", "name": "C17 NO_VERIFIED_PARENT_BANDS refusal removed (a child re-commits from zero bands)",
+    "from": "if (!verified) return { ok: false, reason: 'NO_VERIFIED_PARENT_BANDS' };", "to": "if (false) return { ok: false, reason: 'NO_VERIFIED_PARENT_BANDS' };" }
+]

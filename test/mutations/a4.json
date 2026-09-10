@@ -1,0 +1,4 @@
+[
+  { "file": "core/approvals.js", "name": "A4 rehydrate ignores decisions (a resolved approval comes back pending after restart)",
+    "from": "if (decided.has(e.commandId) || executed.has(e.commandId) || pending.has(e.commandId)) continue;", "to": "if (executed.has(e.commandId) || pending.has(e.commandId)) continue;" }
+]

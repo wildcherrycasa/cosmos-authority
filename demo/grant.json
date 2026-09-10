@@ -1,0 +1,22 @@
+{
+  "grant_id": "grn_582c4e81fc33c37bbdd1",
+  "org_id": "org_demo",
+  "agent_id": "agent_research_01",
+  "status": "active",
+  "currency": "USD",
+  "budget_minor": 50000,
+  "per_payment_cap_minor": 1700,
+  "daily_cap_minor": 5000,
+  "allowed_categories": [
+    "api",
+    "cloud"
+  ],
+  "approval_threshold_minor": 1500,
+  "expires_at": null,
+  "free_rein": false,
+  "capability_root": "6872f07c0c4796138833d239ca0a9660fbdffaaf36629b93f8316c08236d2af1",
+  "policy_version": 1,
+  "created_at": 1788941316299,
+  "policy_hash": "3757b1b59a0eda94d57c92963bb0a128bb03d5bc2169d7a40c43d5fe3564843f",
+  "_note": "the grant these receipts were decided under; the receipts carry a Merkle proof of the ONE category used, never this whole list"
+}

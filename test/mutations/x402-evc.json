@@ -1,0 +1,80 @@
+[
+  {
+    "file": "x402/evc-verifier.js",
+    "name": "X1 unreachable Cosmos FAILS OPEN (the gate opens when its verifier is down)",
+    "from": "    return deny('internal_error', 'cosmos unreachable: ' + (e && e.message ? e.message : e));",
+    "to": "    return allow();"
+  },
+  {
+    "file": "x402/evc-verifier.js",
+    "name": "X2 ESCALATE becomes an ALLOW (a spend awaiting human approval is let through)",
+    "from": "  if (body.decision === 'DENY' || body.decision === 'ESCALATE') {",
+    "to": "  if (body.decision === 'DENY') {"
+  },
+  {
+    "file": "x402/evc-verifier.js",
+    "name": "X3 an indivisible amount is silently ROUNDED instead of refused",
+    "from": "  return n % divisor === 0 ? n / divisor : null;",
+    "to": "  return Math.floor(n / divisor);"
+  },
+  {
+    "file": "x402/evc-verifier.js",
+    "name": "X4 the DENY stops carrying the signed receipt (the one slot evidence fits in)",
+    "from": "  if (body.receipt_id) { detail.cosmos_receipt_id = body.receipt_id; detail.cosmos_evidence = (cfg.publicUrl || cfg.url) + '/evidence/' + body.receipt_id; }",
+    "to": "  if (false) { detail.cosmos_receipt_id = body.receipt_id; detail.cosmos_evidence = (cfg.publicUrl || cfg.url) + '/evidence/' + body.receipt_id; }"
+  },
+  {
+    "file": "x402/evc-verifier.js",
+    "name": "X5 the ALLOW smuggles an extra key, breaking their closed schema",
+    "from": "const allow = () => ({ verdict: 'allow' });",
+    "to": "const allow = () => ({ verdict: 'allow', cosmos: true });"
+  },
+  {
+    "file": "x402/evc-verifier.js",
+    "name": "X6 a mapped code leaves the closed EVC registry (the host discards it)",
+    "from": "  CATEGORY_NOT_ALLOWED: 'unknown_capability',",
+    "to": "  CATEGORY_NOT_ALLOWED: 'category_not_allowed',"
+  },
+  {
+    "file": "x402/evc-verifier.js",
+    "name": "X7 an unrecognised Cosmos decision falls through to an allow",
+    "from": "  return deny('internal_error', 'cosmos returned no recognisable decision');",
+    "to": "  return allow();"
+  },
+  {
+    "file": "x402/evc-verifier.js",
+    "name": "X8 the CLI exits non-zero, so the host discards our code and receipt id",
+    "from": "    process.exit(0);",
+    "to": "    process.exit(1);"
+  },
+  {
+    "file": "x402/evc-verifier.js",
+    "name": "X9 a bundle with no currency/category is accepted and guessed at",
+    "from": "    return deny('invalid_bundle', 'bundle must carry currency and category; x402 context expresses neither');",
+    "to": "    bundle.currency = 'USD'; bundle.category = 'api';"
+  },
+  {
+    "file": "scripts/size.js",
+    "name": "X10 the new top-level directory stops being counted by the ceiling",
+    "from": "const roots = ['core', 'api', 'mcp', 'x402'];",
+    "to": "const roots = ['core', 'api', 'mcp'];"
+  },
+  {
+    "file": "x402/evc-verifier.js",
+    "name": "X11 the evidence link goes back to a host-less relative path",
+    "from": "detail.cosmos_evidence = (cfg.publicUrl || cfg.url) + '/evidence/' + body.receipt_id; }",
+    "to": "detail.cosmos_evidence = '/evidence/' + body.receipt_id; }"
+  },
+  {
+    "file": "x402/evc-verifier.js",
+    "name": "X12 a reason loses its mapping and silently defaults",
+    "from": "  RECEIPT_SIGNER_UNAVAILABLE: 'internal_error',",
+    "to": ""
+  },
+  {
+    "file": "x402/evc-verifier.js",
+    "name": "X13 the internal address is published instead of the public one",
+    "from": "(cfg.publicUrl || cfg.url) + '/evidence/'",
+    "to": "cfg.url + '/evidence/'"
+  }
+]

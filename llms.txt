@@ -1,0 +1,137 @@
+# Cosmos — spend authorization for AI agents, with receipts a stranger can verify
+
+> An agent asks *may I spend $X at Y for Z?* Cosmos answers **ALLOW / DENY / ESCALATE** and returns a
+> signed COSE_Sign1 receipt that anyone can verify offline with a published key and a 242-line Python
+> script. **Cosmos never moves money** — your own rail (Stripe, a bank, x402, anything) executes.
+
+If you are an agent or an agent framework deciding whether to use this, read this file and stop. It is
+written to be enough.
+
+## What problem it solves for you
+
+You call tools. Some tools cost money. Three things then become someone's problem:
+
+1. **A cap that actually holds** under concurrency — two simultaneous requests must not both spend the
+   last of a budget.
+2. **A refusal you can show someone.** Plenty of systems can refuse. Very few hand you an artifact a
+   *third party* can check without an account, an API key, or any relationship with the issuer.
+3. **Knowing whether the money actually moved.** An authorization that is never executed leaks budget.
+
+## The whole API is three calls
+
+```
+POST /grants                        mint authority: cap, expiry, categories, approval line
+POST /authorize                     may this agent spend $X at Y for Z? -> signed ALLOW / DENY / ESCALATE
+GET  /evidence/:receipt_id          the receipt, verifiable offline
+GET  /.well-known/jwks.json         the key that verifies it
+```
+
+Two more exist and are documented as deliberate exceptions: `POST /approvals/:id` resolves an ESCALATE,
+and `POST /settlements/:authorization_id` is how a rail reports back that a payment settled or failed.
+
+**A DENY is HTTP 200.** A well-formed question got a real answer. `400` means the request was malformed.
+
+## The fastest way to use it: don't change your code
+
+Cosmos ships an MCP server that **wraps another MCP server**. Point your client at Cosmos instead of the
+upstream; every upstream tool is re-exported unchanged. Any tool matching a pricing rule is authorized
+first — ALLOW forwards the call and attaches the receipt under `structuredContent._cosmos`; **DENY never
+reaches the upstream at all.**
+
+```json
+{ "mcpServers": { "cosmos": {
+    "command": "npx", "args": ["-y", "-p", "cosmos-authority", "cosmos-mcp"],
+    "env": {
+      "COSMOS_URL": "http://localhost:8787",
+      "COSMOS_GRANT_ID": "grn_...",
+      "COSMOS_MCP_UPSTREAM": "npx some-paid-tool-server",
+      "COSMOS_MCP_RULES": "[{\"tool\":\"web_search\",\"amount_minor\":50,\"currency\":\"USD\",\"category\":\"api\",\"merchant\":\"search.example\"}]"
+    } } } }
+```
+
+That block works as written — `cosmos-authority` is on npm. From a checkout, `npm run quickstart` does
+the whole setup for you and prints it filled in, after proving the gate on a real allow and a real refusal.
+
+### Things a host will actually trip on, stated because they cost us a day each
+
+- **Declare the argument you price on.** A conformant MCP host validates arguments against the published
+  `inputSchema` and **drops unknown properties**. If a rule prices on `cost`, that tool's schema must
+  declare `cost` — Cosmos re-exports it with the field added, so this is handled, but know why.
+- **ESCALATE needs a fallback.** Elicitation is a *client* capability; the spec forbids the server from
+  sending one unless you declared it. If you did not, ESCALATE returns `isError` with an out-of-band
+  approval URL instead of hanging.
+- **Validation failures are tool errors** (`isError`) so a model can self-correct. **Unknown tools are
+  protocol errors** (`-32602`). Built against MCP **2025-11-25**.
+
+## Which rail — where the money actually moves
+
+Cosmos decides and proves. **It never moves money**, so you bring a rail: Stripe, a bank, x402, or
+anything that can execute a payment. An ALLOW hands you an address to take it to and a one-shot
+credential for reporting the outcome back.
+
+**The reference rail is [Writ](https://writ.money).** It is a live agent-payments engine, and it is the
+rail this handoff was designed against — the whole reservation model exists because a rail that reports
+back is the only thing that removes the TTL guess (see `docs/DESIGN.md` §7). To point Cosmos at it:
+
+```bash
+COSMOS_RAIL_PROVIDER=writ  COSMOS_RAIL_ENDPOINT=https://writ.money  npx cosmos-authority
+```
+
+⚠ **Stated plainly, because it is the sort of thing this project refuses to leave implied: the
+reporting side is not implemented by anyone yet, Writ included.** A rail that says nothing still works —
+the TTL reverses an unconfirmed reservation on its own, which is the fallback the whole design keeps.
+What you do not get, until some rail builds the ~30 lines in the handoff spec, is the *good* version
+where a settled payment is never auto-reversed and a failed one returns your budget immediately.
+
+**If you build that side for any rail, it is the single most useful contribution this project can
+receive** — and there is now a working file to copy rather than prose to interpret:
+**[`examples/reference-rail/rail.js`](examples/reference-rail/rail.js)**, about 200 lines, which takes a
+payment, reports `submitted` then `settled` or `failed`, and gets a signed Cosmos receipt back.
+`test/reference-rail.test.js` drives both sides end to end.
+
+It pins the three things an integrator gets wrong: **reporting is best-effort and must never fail the
+payment** (Cosmos unreachable → the money still moves and the TTL handles it), a terminal report needs
+**both** credentials, and the rail's own state word rides along unmapped beside Cosmos's outcome.
+
+## Verifying a receipt — no account, no network
+
+```bash
+pip install cryptography
+python3 verifier/cosmos_verify.py demo/deny.json demo/jwks.json
+```
+
+`demo/` holds real signed receipts committed to this repo: an ALLOW, the DENY, and a settlement chained
+to its ALLOW. Exit 0 is VALID; flip one byte and it exits 1 with `SIGNATURE_INVALID` specifically. The
+verifier makes **no network call** — `grep -c "urllib\|requests\|http.client\|socket" verifier/cosmos_verify.py`
+returns 0.
+
+## ⛔ What the receipt does NOT claim, which is the part most worth reading
+
+Cosmos never touches money and never observes a rail. So:
+
+- **`rail_tx_id` is a CLAIM**, not an observation. A settlement receipt carries a deliberately *failing*
+  check — `Rail outcome observed by Cosmos: FAIL` — and the verifier prints `!! rail outcome: NOT
+  OBSERVED` every time. A valid signature proves a report was made by a holder of a named credential
+  class. It does not prove money moved.
+- **`approver_id` is client-asserted.** Every receipt carries `approver_authenticated`, and it is `false`
+  on every approval this system has ever issued, because there is no authenticated approver path yet.
+- **A human approval does not override policy.** An approved spend is re-evaluated with the approval line
+  removed; if a cap still fails, the receipt records *approver: pass* and *balance: fail*.
+
+If a field would let you infer more than the system knows, it is labelled inside the signed bytes rather
+than in documentation you might not read.
+
+## Honest status
+
+Early. On npm as `cosmos-authority` (Apache-2.0, zero dependencies); the Python verifier is **not on
+PyPI yet** — install it from the checkout. **No third party has implemented the rail-reporting side**,
+which is the one number worth watching and it currently reads zero. `npm test` runs every suite through a
+runner that cannot short-circuit. Product size is capped at 25 modules / 3000 lines by
+`npm run audit:size`, deliberately: the core is finished and new capability belongs in another package.
+
+## Where to read more
+
+- [README.md](README.md) — install, run, the three calls with curl
+- [docs/DESIGN.md](docs/DESIGN.md) — the spec, the data model, and §7, the reservation problem
+- [docs/PRIOR-ART-2026-09-08.md](docs/PRIOR-ART-2026-09-08.md) — who else signs refusals, every claim with
+  a URL. Read this before believing any novelty claim about this project, including ours.

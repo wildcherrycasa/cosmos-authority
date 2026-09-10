@@ -1,0 +1,30 @@
+node_modules/
+*.log
+*.jsonl
+# gitignore does NOT support trailing comments - a comment on a pattern line becomes part of the pattern.
+# Two lines below were silently broken that way from fe5b53b to ebb8fc6.
+
+# the append-only event log - runtime state, never committed
+data/
+
+# python packaging artifacts from `pip install -e verifier/` and `python -m build`
+*.egg-info/
+verifier/build/
+verifier/dist/
+__pycache__/
+
+# git bundles live in this folder (founder instruction 2026-09-06, not OneDrive),
+# but a backup of the repo must never be committed INTO the repo
+*.bundle
+.env
+.env.*
+# the template MUST commit, or a fresh clone cannot be set up from its own instructions
+# (Writ's headline bug, 2026-09-06). gitignore is last-match-wins, so this negation comes AFTER .env.*
+!.env.example
+keys/
+secrets/
+secrets.json
+
+# The reference rail persists pending reports here. Each row carries an authorization handoff token,
+# so this file is a credential store, not a log. It must never be committed and never be published.
+examples/reference-rail/rail-outbox.jsonl

@@ -1,0 +1,18 @@
+[
+  { "file": "core/guardrails.js", "name": "B1 per-payment cap exclusive: exactly-at-cap DENIED (<= became <)",
+    "from": "const perTx = amount <= agent.perPaymentCap;", "to": "const perTx = amount < agent.perPaymentCap;" },
+  { "file": "core/guardrails.js", "name": "B2 balance exclusive: spending exactly the remaining budget DENIED",
+    "from": "const funded = amount <= remaining;", "to": "const funded = amount < remaining;" },
+  { "file": "core/guardrails.js", "name": "B3 daily cap off by one: exactly-at-cap DENIED",
+    "from": "const daily = (agent.spentToday || 0) + amount <= agent.dailyCap;", "to": "const daily = (agent.spentToday || 0) + amount < agent.dailyCap;" },
+  { "file": "core/guardrails.js", "name": "B4 daily cap one unit LOOSER: one over the cap ALLOWED",
+    "from": "const daily = (agent.spentToday || 0) + amount <= agent.dailyCap;", "to": "const daily = (agent.spentToday || 0) + amount <= agent.dailyCap + 1;" },
+  { "file": "core/guardrails.js", "name": "B5 per-payment cap one unit LOOSER: one over the cap ALLOWED",
+    "from": "const perTx = amount <= agent.perPaymentCap;", "to": "const perTx = amount <= agent.perPaymentCap + 1;" },
+  { "file": "core/guardrails.js", "name": "B6 expiry inclusive/exclusive flip at the exact instant",
+    "from": "const notExpired = !(agent.expiry && Date.now() > agent.expiry);", "to": "const notExpired = !(agent.expiry && Date.now() >= agent.expiry);" },
+  { "file": "core/guardrails.js", "name": "B7 category match made case-insensitive (tolerance flipped)",
+    "from": "!agent.allowedCategories.includes(category)", "to": "!agent.allowedCategories.map((c) => String(c).toLowerCase()).includes(String(category).toLowerCase())" },
+  { "file": "core/approvals.js", "name": "B8 approval line inclusive: exactly-at-threshold ESCALATES (> became >=)",
+    "from": "return +amount > thresholdFor(agent);", "to": "return +amount >= thresholdFor(agent);" }
+]

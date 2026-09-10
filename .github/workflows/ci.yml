@@ -1,0 +1,61 @@
+# CI — because until now the ONLY evidence that Cosmos's suite passed was a session saying so.
+#
+# Five PRs merged on 2026-09-06 whose green tick existed solely in a PR body written by the same session
+# that wrote the code. That is the "self graded codes" failure this repo is built around, still true in the
+# one place nobody had looked: the repo's own CI. An exit code produced by a machine that is not the
+# author's laptop is evidence; a sentence in a PR description is a claim.
+#
+# It also runs on UBUNTU, deliberately. Every test to date ran on the founder's Windows box, which is why
+# `spawnSync('python', …)` survived — `python` exists there and does not exist on macOS 12.3+ or a default
+# Ubuntu. The platform gap hid a bug in the product's headline command.
+name: ci
+
+on:
+  push:
+    # BOTH names, deliberately. This repo's default is master; the PUBLIC repo built by
+    # `npm run export:public` defaults to main. A workflow that lists only one silently never fires in the
+    # other, and a repository that LOOKS like it has CI while running none is worse than one with none —
+    # the badge is the claim. Caught by checking whether the run actually happened after publishing,
+    # rather than by assuming the file being present meant it worked.
+    branches: [master, main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  suite:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # audit:repo scans EVERY ref for sensitive paths ("clean now" and "never leaked" are different
+          # claims). A shallow clone would let it pass by seeing only one commit — a control that cannot
+          # match is indistinguishable from one that is working.
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'      # package.json engines: >=20; the Dockerfile pins node:20-alpine
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # The verifier is the product claim: a stranger checks a receipt with no Cosmos code. `cryptography`
+      # is its ONLY dependency — if this line ever needs a second package, the claim has weakened.
+      - run: pip install cryptography
+
+      - name: zero runtime dependencies, asserted rather than assumed
+        run: |
+          test ! -d node_modules || (echo "node_modules exists in a repo that claims zero deps" && exit 1)
+          node -e "const p=require('./package.json');const d={...p.dependencies,...p.devDependencies};if(Object.keys(d).length){console.error('DEPENDENCIES APPEARED:',d);process.exit(1)}console.log('zero dependencies confirmed')"
+
+      - run: npm test                 # scripts/test-all.js — aggregates every suite, never short-circuits
+      - run: npm run audit:size       # 25 modules / 3000 lines, a deliberate ceiling
+      - run: npm run audit:repo       # ignore rules, sensitive paths at HEAD and across all refs
+
+      # NOT RUN HERE, on purpose: `npm run audit:vendored`. It hashes this tree against Writ's working
+      # copy, which does not exist on a CI runner — and since 92d72d3 an unreachable source tree is a hard
+      # FAILURE rather than a silent pass, precisely so a vacuous run cannot look clean. Running it here
+      # would therefore fail for the right reason at the wrong time. It stays a local gate.

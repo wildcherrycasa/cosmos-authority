@@ -1,0 +1,10 @@
+[
+  { "file": "api/server.js", "name": "H1 the event-log path returns to /health (filesystem topology to any caller)",
+    "from": "          signing_kid: keystore.activeKid(),\n        },\n      }) },", "to": "          signing_kid: keystore.activeKid(), log: store.file(),\n        },\n      }) }," },
+  { "file": "api/server.js", "name": "H2 a path leaks through a DIFFERENT field name — the assertion must not be keyed on `log`",
+    "from": "          ok: true, events: store.events().length, skipped_lines: store.skippedLines(),", "to": "          ok: true, storage: store.file(), events: store.events().length, skipped_lines: store.skippedLines()," },
+  { "$comment": "H3 must be SYNTACTICALLY VALID to prove anything. The first version wrapped the handler in `guardOperator(` without closing it — every suite then died on a parse error, which the runner correctly reported as CAUGHT* (caught, but blind: no assertion named the defect). A mutation that cannot parse tests the parser. This version inserts a guarded /health route BEFORE the real one and renames the original to an unmatched path, so routing order makes /health guarded while the file still parses." },
+  { "file": "api/server.js", "name": "H3 /health gets guarded — a health check that needs a token stops being used",
+    "from": "    { method: 'GET', match: exact('/health'), handler: async () => ({",
+    "to": "    { method: 'GET', match: exact('/health'), handler: guardOperator(writePolicy, async () => ({ status: 200, body: { ok: true } })) },\n    { method: 'GET', match: exact('/health-unreachable'), handler: async () => ({" }
+]

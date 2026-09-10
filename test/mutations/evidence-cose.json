@@ -1,0 +1,16 @@
+[
+  { "file": "api/evidence.js", "name": "E1 raw COSE ignored — Accept: application/cose still returns JSON",
+    "from": "if (wantsCose(req && req.headers && req.headers.accept)) {", "to": "if (false) {" },
+  { "file": "api/evidence.js", "name": "E2 content-type mislabelled as octet-stream",
+    "from": "contentType: 'application/cose',", "to": "contentType: 'application/octet-stream'," },
+  { "file": "api/evidence.js", "name": "E3 raw body is the BASE64 TEXT, not the bytes (the classic double-encode)",
+    "from": "return { status: 200, raw: bytes, contentType: 'application/cose',", "to": "return { status: 200, raw: Buffer.from(e.cose), contentType: 'application/cose'," },
+  { "file": "api/evidence.js", "name": "E4 q=0 refusal ignored — a client that explicitly refuses COSE gets it anyway",
+    "from": "return !(q && parseFloat(q[1]) === 0);", "to": "return true;" },
+  { "file": "api/evidence.js", "name": "E5 negotiation by substring — */* and application/json start returning COSE",
+    "from": "if (type.toLowerCase() !== 'application/cose') continue;", "to": "if (!String(accept).includes('cose') && type !== '*/*') continue;" },
+  { "file": "api/evidence.js", "name": "E6 kid header dropped from the raw response",
+    "from": "headers: { link: '</.well-known/jwks.json>; rel=\"jwks\"', 'x-cosmos-kid': String(e.kid) } };", "to": "headers: { link: '</.well-known/jwks.json>; rel=\"jwks\"' } };" },
+  { "file": "api/http.js", "name": "E7 raw responses fall through to JSON.stringify (a Buffer becomes a JSON object)",
+    "from": "if (out.raw) {", "to": "if (false) {" }
+]

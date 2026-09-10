@@ -1,0 +1,76 @@
+{
+  "name": "cosmos-authority",
+  "version": "0.1.1",
+  "license": "Apache-2.0",
+  "main": "index.js",
+  "description": "Authority layer for autonomous agents that spend money. Decides and proves; never moves money.",
+  "engines": {
+    "node": ">=20"
+  },
+  "bin": {
+    "cosmos": "api/server.js",
+    "cosmos-mcp": "mcp/server.js"
+  },
+  "files": [
+    "index.js",
+    "api",
+    "core",
+    "mcp",
+    "x402",
+    "scripts",
+    "verifier",
+    "demo",
+    "server.json",
+    "README.md",
+    "llms.txt",
+    "!scripts/audit-vendored.js",
+    "docs/DESIGN.md",
+    "docs/PRIOR-ART-2026-09-08.md",
+    "!scripts/export-public.js",
+    "!scripts/release-preflight.js",
+    "!verifier/dist",
+    "!verifier/__pycache__",
+    "!verifier/cosmos_verify.egg-info",
+    "examples"
+  ],
+  "keywords": [
+    "mcp",
+    "ai-agents",
+    "authorization",
+    "cose",
+    "scitt",
+    "receipts",
+    "agent-payments",
+    "spend-limits",
+    "x402",
+    "offline-verification",
+    "writ"
+  ],
+  "scripts": {
+    "start": "node api/server.js",
+    "audit:ledger": "node scripts/audit-ledger.js",
+    "smoke": "node test/smoke.test.js",
+    "test": "node scripts/test-all.js",
+    "mcp": "node mcp/server.js",
+    "demo": "node scripts/demo.js",
+    "keygen": "node scripts/keygen.js",
+    "backup": "node scripts/backup.js",
+    "audit:repo": "node scripts/audit-repo.js",
+    "audit:vendored": "node scripts/audit-vendored.js",
+    "vendored:md": "node scripts/audit-vendored.js --write",
+    "audit:size": "node scripts/size.js",
+    "bench:io": "node scripts/bench-io.js",
+    "bench:evidence": "node scripts/bench-evidence.js",
+    "preflight": "node scripts/release-preflight.js",
+    "export:public": "node scripts/export-public.js",
+    "quickstart": "node scripts/quickstart.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wildcherrycasa/cosmos-authority.git"
+  },
+  "homepage": "https://github.com/wildcherrycasa/cosmos-authority#readme",
+  "bugs": {
+    "url": "https://github.com/wildcherrycasa/cosmos/issues"
+  }
+}

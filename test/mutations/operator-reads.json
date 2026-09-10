@@ -1,0 +1,8 @@
+[
+  { "file": "api/server.js", "name": "O1 /audit unguarded — every grant readable by anyone who can reach the port",
+    "from": "    { method: 'GET', match: exact('/audit'), handler: guardOperator(writePolicy, async () => ({ status: 200, body: store.live() })) },", "to": "    { method: 'GET', match: exact('/audit'), handler: async () => ({ status: 200, body: store.live() }) }," },
+  { "file": "api/server.js", "name": "O2 GET /approvals unguarded — pending escalations readable by anyone",
+    "from": "    { method: 'GET', match: exact('/approvals'), handler: guardOperator(writePolicy, makeApprovalsListRoute()) },", "to": "    { method: 'GET', match: exact('/approvals'), handler: makeApprovalsListRoute() }," },
+  { "file": "api/auth.js", "name": "O3 the operator guard stops applying to reads (mode check inverted for GET)",
+    "from": "  if (policy.mode !== 'token') return handler;", "to": "  if (policy.mode !== 'token' || handler.length < 3) return handler;" }
+]

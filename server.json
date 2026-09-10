@@ -1,0 +1,42 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.schema.json",
+  "name": "io.github.wildcherrycasa/cosmos-authority",
+  "description": "Spend authorization for AI agents with signed, offline-verifiable receipts. Wraps paid MCP tools: ALLOW forwards, DENY never executes. Hands the agent a rail to execute on (Writ by reference) and never moves money itself.",
+  "version": "0.1.1",
+  "repository": {
+    "url": "https://github.com/wildcherrycasa/cosmos-authority",
+    "source": "github"
+  },
+  "packages": [
+    {
+      "registry_type": "npm",
+      "identifier": "cosmos-authority",
+      "version": "0.1.1",
+      "transport": {
+        "type": "stdio"
+      },
+      "environment_variables": [
+        {
+          "name": "COSMOS_URL",
+          "description": "Cosmos API base URL, e.g. http://localhost:8787",
+          "is_required": true
+        },
+        {
+          "name": "COSMOS_GRANT_ID",
+          "description": "The grant this agent spends under",
+          "is_required": true
+        },
+        {
+          "name": "COSMOS_MCP_UPSTREAM",
+          "description": "Command line of the upstream MCP server to wrap, e.g. \"npx some-paid-tool-server\"",
+          "is_required": false
+        },
+        {
+          "name": "COSMOS_MCP_RULES",
+          "description": "JSON array of pricing rules: [{\"tool\":\"web_search\",\"amount_minor\":50,\"currency\":\"USD\",\"category\":\"api\",\"merchant\":\"search.example\"}]",
+          "is_required": false
+        }
+      ]
+    }
+  ]
+}

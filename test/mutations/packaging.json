@@ -1,0 +1,10 @@
+[
+  { "file": "package.json", "name": "K1 the npm name drifts from what server.json publishes",
+    "from": "\"name\": \"cosmos-authority\"", "to": "\"name\": \"cosmos\"" },
+  { "file": "package.json", "name": "K2 versions drift apart",
+    "from": "\"version\": \"0.1.0\"", "to": "\"version\": \"0.2.0\"" },
+  { "file": "package.json", "name": "K3 a shipped path is removed from files (tarball installs, then fails)",
+    "from": "\"files\": [\"api\", \"core\", \"mcp\", \"scripts\", \"verifier\", \"demo\"", "to": "\"files\": [\"api\", \"core\", \"mcp\", \"scripts\", \"nonexistent-dir\", \"demo\"" },
+  { "file": "server.json", "name": "K4 a placeholder comes back",
+    "from": "io.github.wildcherrycasa/cosmos", "to": "io.github.REPLACE_WITH_GITHUB_USER/cosmos" }
+]

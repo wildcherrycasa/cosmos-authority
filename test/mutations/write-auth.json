@@ -1,0 +1,20 @@
+[
+  { "file": "api/auth.js", "name": "W1 the guard is a no-op — every write path is open again",
+    "from": "  if (policy.mode !== 'token') return handler;", "to": "  if (true) return handler;" },
+  { "file": "api/auth.js", "name": "W2 production no longer refuses to start without a token (silent open mint)",
+    "from": "  if (production) {\n    throw new Error('NO_WRITE_TOKEN:", "to": "  if (false) {\n    throw new Error('NO_WRITE_TOKEN:" },
+  { "file": "api/auth.js", "name": "W3 a guessable short token is accepted",
+    "from": "    if (String(token).length < 16) throw new Error('WRITE_TOKEN_TOO_SHORT", "to": "    if (false) throw new Error('WRITE_TOKEN_TOO_SHORT" },
+  { "file": "api/auth.js", "name": "W4 401 distinguishes 'no token' from 'wrong token' (tells a prober which half to attack)",
+    "from": "      throw Object.assign(new HttpError(401, 'UNAUTHORIZED', 'this path creates authority and requires a bearer token'),", "to": "      throw Object.assign(new HttpError(401, presented ? 'BAD_TOKEN' : 'NO_TOKEN', 'this path creates authority and requires a bearer token')," },
+  { "file": "api/auth.js", "name": "W5 any auth scheme is accepted, not just Bearer",
+    "from": "  const m = /^Bearer[ ]+(.+)$/.exec(String(h).trim());", "to": "  const m = /^[A-Za-z]+[ ]+(.+)$/.exec(String(h).trim());" },
+  { "file": "api/auth.js", "name": "W6 comparison becomes a prefix match — a one-character token would authenticate",
+    "from": "  return crypto.timingSafeEqual(a, b);", "to": "  return String(presented).length > 0 && String(expected).startsWith(String(presented));" },
+  { "file": "api/auth.js", "name": "W7 WWW-Authenticate dropped from the 401 (RFC 9110 §11.6.1 requires it)",
+    "from": "        { headers: { 'www-authenticate': 'Bearer realm=\"cosmos\", charset=\"UTF-8\"' } });", "to": "        {});" },
+  { "file": "api/server.js", "name": "W8 OVER-BROAD: /authorize gets locked too — an agent can no longer ask permission",
+    "from": "    { method: 'POST', match: exact('/authorize'), handler: makeAuthorizeRoute(store, keystore) },", "to": "    { method: 'POST', match: exact('/authorize'), handler: guardWrites(writePolicy, makeAuthorizeRoute(store, keystore)) }," },
+  { "file": "api/server.js", "name": "W9 OVER-BROAD: /evidence gets locked — a verifier with no account is the whole product",
+    "from": "    { method: 'GET', match: param('/evidence/', 'id'), handler: makeEvidenceRoute(store, keystore) },", "to": "    { method: 'GET', match: param('/evidence/', 'id'), handler: guardWrites(writePolicy, makeEvidenceRoute(store, keystore)) }," }
+]

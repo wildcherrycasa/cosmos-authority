@@ -1,0 +1,14 @@
+[
+  { "file": "core/receipt.js", "name": "P1 the disclosure field is dropped from the signed payload entirely",
+    "from": "    approver_authenticated: d.approver_id == null ? null : (d.approver_authenticated === true),", "to": "" },
+  { "file": "core/receipt.js", "name": "P2 the receipt CLAIMS the approver was authenticated when nothing checked",
+    "from": "approver_authenticated: d.approver_id == null ? null : (d.approver_authenticated === true),", "to": "approver_authenticated: d.approver_id == null ? null : true," },
+  { "file": "core/receipt.js", "name": "P3 a first-pass decision reports false instead of null (implies an approver was checked and rejected)",
+    "from": "approver_authenticated: d.approver_id == null ? null : (d.approver_authenticated === true),", "to": "approver_authenticated: d.approver_authenticated === true," },
+  { "file": "core/receipt.js", "name": "P4 a truthy caller-supplied value flips it to authenticated (the field becomes client-controlled)",
+    "from": "approver_authenticated: d.approver_id == null ? null : (d.approver_authenticated === true),", "to": "approver_authenticated: d.approver_id == null ? null : !!d.approver_authenticated," },
+  { "file": "core/receipt.js", "name": "P5 schema NOT bumped — an old verifier would print approver_id with no qualifier",
+    "from": "const SCHEMA = 2;", "to": "const SCHEMA = 1;" },
+  { "file": "verifier/cosmos_verify.py", "name": "P6 the Python verifier stops warning that the approver is unverified",
+    "from": "            print(\"    ⚠ approver identity: NOT AUTHENTICATED — asserted by the caller and never checked.\")", "to": "            pass" }
+]

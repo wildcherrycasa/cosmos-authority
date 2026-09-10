@@ -1,0 +1,17 @@
+# Line endings are pinned to LF in the repository AND in the working tree.
+#
+# Without this, the founder's global core.autocrlf=true checks these files out as
+# CRLF while storing them as LF. That is invisible on one machine and churns whole
+# files into every diff the moment a second machine, a CI runner, or a container
+# touches the repo. Pinning it here makes the repo self-describing: the setting
+# travels with the code instead of living in one person's global git config.
+#
+# `text=auto` still lets git detect and leave binary files alone, so this stays
+# correct if an image ever lands in docs/.
+* text=auto eol=lf
+
+# Explicit for the file types actually in the repo, so intent survives a future
+# edit to the blanket rule above.
+*.js   text eol=lf
+*.json text eol=lf
+*.md   text eol=lf
